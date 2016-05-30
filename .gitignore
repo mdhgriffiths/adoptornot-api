@@ -1,0 +1,5 @@
+**/testss/_output
+/dataset/
+/vendor/
+.idea
+.env
