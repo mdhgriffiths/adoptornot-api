@@ -1,0 +1,11 @@
+{
+    "name": "mdhgriffiths/adoptornot-api",
+    "description": "REST/JSON API for Adopt or Not (powered by RescueGroups.org)",
+    "version": "1.0.0",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "AdoptOrNot\\Api\\": "src/"
+        }
+    }
+}
