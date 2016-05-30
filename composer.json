@@ -7,12 +7,25 @@
         "psr-4": {
             "AdoptOrNot\\Api\\": "src/",
             "AdoptOrNot\\Api\\Test\\": "tests/"
-        }
+        },
+        "classmap": [
+            "database/"
+        ],
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "require": {
+        "vlucas/phpdotenv": "~2.2.1"
     },
     "require-dev": {
-        "codeception/codeception": "~2.1.8"
+        "codeception/codeception": "~2.1.8",
+        "robmorgan/phinx": "~0.5.3"
     },
     "scripts": {
-        "tests": "codecept run"
+        "tests": "codecept run",
+        "post-install-cmd": [
+            "phinx migrate"
+        ]
     }
 }
