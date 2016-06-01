@@ -2,26 +2,29 @@
 REST/JSON API for Adopt or Not, powered by [Adoptable Pet Data from RescueGroups.org][0].
 
 ## Installation
-
 An `.env` file must be created to store the application's config:
 
 ```
-# Application's MySQL Settings
+# MySQL Connection Settings
 ADOPTORNOT_MYSQL_HOSTNAME=
 ADOPTORNOT_MYSQL_USERNAME=
 ADOPTORNOT_MYSQL_PASSWORD=
 ADOPTORNOT_MYSQL_DATABASE=
 
-# RescueGroups.org FTP Credentials
-RESCUEGROUPS_FTP_HOSTNAME=
-RESCUEGROUPS_FTP_USERNAME=
-RESCUEGROUPS_FTP_PASSWORD=
+# RescueGroups.org API Key
+RESCUEGROUPS_APIKEY={XXXX}
 ```
 
 Once configured, install using Composer:
 
 ```
 composer install
+```
+
+Run application from `src/public` using the command:
+
+```
+php -S localhost:8000
 ```
 
 
