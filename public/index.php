@@ -3,13 +3,17 @@
 namespace AdoptOrNot\Api;
 use \Slim\App as SlimApp;
 
+// TODO: error handler to return valid JSON response
+// TODO: implement API authentication / rate limiting
+
 // Include core bootstrap file
 require_once '../src/bootstrap.php';
 
 // Setup application
 $app = new SlimApp([
     'settings' => [
-        // TODO: only set in DEV env
+        'outputBuffering' => false,
+        // TODO: disable errors in prod.
         'displayErrorDetails' => true,
         'database' => [
             'hostname' => env('ADOPTORNOT_MYSQL_HOSTNAME', 'localhost'),
@@ -20,19 +24,11 @@ $app = new SlimApp([
     ]
 ]);
 
-// Add dependencies
-$container = $app->getContainer();
-$container['db'] = function ($c) {
-    $config = $c['settings']['db.connection'];
-    $dsn = sprintf('mysql:host=%s;dbname=%s', $config['hostname'], $config['database']);
-    $pdo = new \PDO($dsn, $config['username'], $config['password']);
-    return $pdo;
-};
+// Setup application dependencies
+require_once '../src/container.php';
 
-// Main application route
-$app->get('/', function ($request, $response) {
-    return $response->withJson('Hello World!');
-});
+// Main application route (search for animals)
+$app->get('/', Controller\SearchAnimals::class);
 
 // Execute
 $app->run();
