@@ -11,4 +11,9 @@ $root_path = realpath(__DIR__ . '/..') . '/';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load $_ENV from .env file
-(new Dotenv($root_path))->load();
+$dotenv = new Dotenv($root_path);
+$dotenv->load();
+
+// Check required $_ENV variables
+$required = ['RESCUEGROUPS_APIKEY'];
+$dotenv->required($required)->notEmpty();
