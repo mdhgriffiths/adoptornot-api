@@ -1,6 +1,8 @@
 <?php
 
 namespace AdoptOrNot\Api\RescueGroups;
+use AdoptOrNot\Api\Util\CurlClient;
+use AdoptOrNot\Api\Util\JsonTools;
 
 /**
  * RescueGroups.org API Client
@@ -25,99 +27,50 @@ class ApiClient {
      * Constructor
      * @param string $apiKey
      */
-    public function __construct ($apiKey) {
+    public function __construct($apiKey) {
         $this->apiKey = $apiKey;
     }
 
     /**
-     * Send POST request to API
-     * @param array $data
+     * Get available animals
+     * @param array $fields
+     * @param array $filters
+     * @param int $limit
      * @return mixed
      * @throws \Exception
      */
-    public function post (array $data = []) {
+    public function searchAnimals(array $fields, array $filters = [], $limit = 10) {
+        return $this->post([
+            'objectType' => 'animals',
+            'objectAction' => 'publicSearch',
+            'search' => [
+                'resultSort' => 'animalID',
+                'resultLimit' => $limit,
+                'filters' => $filters,
+                'fields' => $fields
+            ]
+        ]);
+    }
+
+    /**
+     * Send POST request to API
+     * @param array $data POST data
+     * @return array Response data
+     * @throws \Exception On failure
+     */
+    public function post(array $data = []) {
 
         // Include API key in request
-        $data = array_merge([
-            'apikey' => $this->apiKey
-        ], $data);
+        $data = json_encode(['apikey' => $this->apiKey] + $data);
+		$headers = ['Content-Type: application/json'];
 
-        // POST JSON data to API
-        $jsonData = json_encode($data);
-        $response = $this->postJsonData($jsonData);
-        $jsonResponse = json_decode($response, true);
+        // POST JSON data to API via cURL
+        $curl = new CurlClient($this->apiUrl);
+        $response = $curl->post($data, $headers);
 
-        // TODO: handle JSON errors
-        if ($jsonError = $this->getJsonError()) {
-            throw new \Exception(sprintf(
-                'Failed to parse JSON data [%s]',
-                $jsonError
-            ));
-        }
+        // Return response data as JSON
+        return JsonTools::decode($response);
 
-        // JSON response data
-        return $jsonResponse;
-
-    }
-
-    /**
-     * Send POST request and return response data
-     * @param array $data
-     * @return mixed
-     * @throws \Exception If cURL failed
-     */
-    protected function postJsonData (array $data) {
-
-        // Request headers (send data as JSON0
-        $headers = ['Content-Type: application/json'];
-
-        // cURL instance
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_VERBOSE, true); // DEBUG !!!
-        curl_setopt($ch, CURLOPT_POST, 1);
-
-        // Execute cURL request
-        $result = curl_exec($ch);
-
-        // TODO: handle errors
-        if (curl_errno($ch)) {
-            throw new \Exception(sprintf(
-                'Failed to execute cURL request [%s]',
-                curl_error($ch)
-            ));
-        }
-
-        // Response data
-        curl_close($ch);
-        return $result;
-
-    }
-
-    /**
-     * Get message for last JSON error
-     * @return string|false
-     */
-    protected function getJsonError() {
-        switch (json_last_error()) {
-            case JSON_ERROR_NONE:
-                return false;
-            case JSON_ERROR_DEPTH:
-                return 'Maximum stack depth exceeded';
-            case JSON_ERROR_STATE_MISMATCH:
-                return 'Underflow or the modes mismatch';
-            case JSON_ERROR_CTRL_CHAR:
-                return 'Unexpected control character found';
-            case JSON_ERROR_SYNTAX:
-                return 'Syntax error, malformed JSON';
-            case JSON_ERROR_UTF8:
-                return 'Malformed UTF-8 characters, possibly incorrectly encoded';
-            default:
-                return 'Unknown error';
-        }
     }
 
 }

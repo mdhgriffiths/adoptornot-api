@@ -41,9 +41,15 @@ class SearchAnimals {
     public function __invoke (Request $request, Response $response, $args) {
         try {
 
-            // Find & return list of available pets
-            $animals = $this->getAvailableAnimals();
+            // Search for available animals to adopt
+            $animals = $this->apiClient->searchAnimals(
+                $this->getSearchFields(),
+                $this->getSearchFilters()
+            );
+
+            // Return list of adoptable animals
             return $response->withJson($animals, 200, JSON_PRETTY_PRINT);
+            // TODO: don't set JSON_PRETTY_PRINT in production
 
         // TODO: error handling
         } catch (\Exception $e) {
@@ -53,29 +59,11 @@ class SearchAnimals {
     }
 
     /**
-     * Get animals to adopt
-     * @return mixed
-     * @throws \Exception
-     */
-    protected function getAvailableAnimals () {
-        return $this->apiClient->post([
-            'objectType' => 'animals',
-            'objectAction' => 'publicSearch',
-            'search' => [
-                'resultSort' => 'animalID',
-                'resultLimit' => $this->limit,
-                'fields' => $this->getAnimalFields(),
-                'filters' => $this->getAnimalFilters()
-            ]
-        ]);
-    }
-
-    /**
      * Get list of animal fields to fetch
      * @link https://userguide.rescuegroups.org/display/APIDG/Object+definitions#Objectdefinitions-17.publicSearch
      * @return array
      */
-    protected function getAnimalFields() {
+    protected function getSearchFields() {
         return [
             'animalID',
             'animalOrgID',
@@ -96,7 +84,7 @@ class SearchAnimals {
      * @link https://userguide.rescuegroups.org/display/APIDG/Using+search+filters+with+the+HTTP+API
      * @return array
      */
-    protected function getAnimalFilters() {
+    protected function getSearchFilters() {
         return [
             // Only adoptable pets
             ['fieldName' => 'animalStatus', 'operation' => 'equals', 'criteria' => 'Available'],
